@@ -1,5 +1,7 @@
 #include "song.h"
 
+const bool debug = false;
+
 const int piezo_pin = 8;
 const Song::Note r2d2_notes[] = {
     {Song::Pitch_A7, 100},
@@ -91,7 +93,8 @@ void setup()
 
     interrupts();
 
-    Serial.begin(9600);
+    if (debug)
+        Serial.begin(9600);
 }
 
 void loop()
