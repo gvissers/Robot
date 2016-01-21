@@ -1,8 +1,15 @@
+#include <Adafruit_MotorShield.h>
+
 #include "song.h"
 
 const bool debug = false;
 
 const int piezo_pin = 8;
+
+// Create the motor shield object with the default I2C address
+Adafruit_MotorShield AFMS = Adafruit_MotorShield();
+Adafruit_DCMotor *motor_left = AFMS.getMotor(1);
+Adafruit_DCMotor *motor_right = AFMS.getMotor(2);
 
 Song r2d2_song("AGECDBFcAGECDBFc", 100, 7);
 Song popcorn_song("aGaECEA,2aGaECEA,2abc'bc'ababgagafa2");
@@ -44,6 +51,8 @@ void setup()
 
     if (debug)
         Serial.begin(9600);
+
+    AFMS.begin();  // create with the default frequency 1.6KHz
 }
 
 void loop()
@@ -54,5 +63,34 @@ void loop()
         current_song = &popcorn_song;
     }
 
-    delay(3000);
+    motor_left->run(FORWARD);
+    motor_right->run(FORWARD);
+    for (int i=0; i<255; ++i)
+    {
+        motor_left->setSpeed(i);
+        motor_right->setSpeed(i);
+        delay(10);
+    }
+    for (int i = 255; i != 0; --i)
+    {
+        motor_left->setSpeed(i);
+        motor_right->setSpeed(i);
+        delay(10);
+    }
+    motor_left->run(BACKWARD);
+    motor_right->run(BACKWARD);
+    for (int i=0; i<255; ++i)
+    {
+        motor_left->setSpeed(i);
+        motor_right->setSpeed(i);
+        delay(10);
+    }
+    for (int i = 255; i != 0; --i)
+    {
+        motor_left->setSpeed(i);
+        motor_right->setSpeed(i);
+        delay(10);
+    }
+
+    delay(1000);
 }
