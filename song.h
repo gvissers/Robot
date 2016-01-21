@@ -1,3 +1,6 @@
+#ifndef SONG_H
+#define SONG_H
+
 class Song
 {
 public:
@@ -41,3 +44,4 @@ private:
     int _cur_ms;
 };
 
+#endif // SONG_H
