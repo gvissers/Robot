@@ -3,62 +3,9 @@
 const bool debug = false;
 
 const int piezo_pin = 8;
-const Song::Note r2d2_notes[] = {
-    {Song::Pitch_A7, 100},
-    {Song::Pitch_G7, 100},
-    {Song::Pitch_E7, 100},
-    {Song::Pitch_C7, 100},
-    {Song::Pitch_D7, 100},
-    {Song::Pitch_B7, 100},
-    {Song::Pitch_F7, 100},
-    {Song::Pitch_C8, 100},
-    {Song::Pitch_A7, 100},
-    {Song::Pitch_G7, 100},
-    {Song::Pitch_E7, 100},
-    {Song::Pitch_C7, 100},
-    {Song::Pitch_D7, 100},
-    {Song::Pitch_B7, 100},
-    {Song::Pitch_F7, 100},
-    {Song::Pitch_C8, 100}
-};
-const int r2d2_nr_notes = sizeof(r2d2_notes) / sizeof(*r2d2_notes);
-const Song::Note popcorn_notes[] = {
-    {Song::Pitch_A5, 150},
-    {Song::Pitch_G4, 150},
-    {Song::Pitch_A5, 150},
-    {Song::Pitch_E4, 150},
-    {Song::Pitch_C4, 150},
-    {Song::Pitch_E4, 150},
-    {Song::Pitch_A3, 300},
 
-    {Song::Pitch_A5, 150},
-    {Song::Pitch_G4, 150},
-    {Song::Pitch_A5, 150},
-    {Song::Pitch_E4, 150},
-    {Song::Pitch_C4, 150},
-    {Song::Pitch_E4, 150},
-    {Song::Pitch_A3, 300},
-
-    {Song::Pitch_A5, 150},
-    {Song::Pitch_B5, 150},
-    {Song::Pitch_C6, 150},
-    {Song::Pitch_B5, 150},
-    {Song::Pitch_C6, 150},
-    {Song::Pitch_A5, 150},
-    {Song::Pitch_B5, 150},
-    {Song::Pitch_A5, 150},
-    {Song::Pitch_B5, 150},
-    {Song::Pitch_G5, 150},
-    {Song::Pitch_A5, 150},
-    {Song::Pitch_G5, 150},
-    {Song::Pitch_A5, 150},
-    {Song::Pitch_F5, 150},
-    {Song::Pitch_A5, 300},
-};
-const int popcorn_nr_notes = sizeof(popcorn_notes) / sizeof(*popcorn_notes);
-
-Song r2d2_song(r2d2_notes, r2d2_nr_notes);
-Song popcorn_song(popcorn_notes, popcorn_nr_notes);
+Song r2d2_song("AGECDBFcAGECDBFc", 100, 7);
+Song popcorn_song("aGaECEA,2aGaECEA,2abc'bc'ababgagafa2");
 
 Song* current_song = nullptr;
 
