@@ -3,7 +3,7 @@
 
 void Song::update()
 {
-    // Hz values for 4th octave (C, Db, D, ..., A, Bb, B)
+    // Hz values for 4th octave (C, Db, D, Eb, E, F, Gb, G, Ab, A, Bb, B)
     // equal tempered scale
     static const float octave4[] = {
         261.6255653005986, 277.1826309768721,  293.6647679174076,
@@ -69,12 +69,20 @@ void Song::update()
 
     if (c == '^')
     {
-        ++pitch_idx;
+        if (++pitch_idx >= 12)
+        {
+            pitch_idx -= 12;
+            ++shift;
+        }
         c = _desc[++_cur_idx];
     }
     else if (c == '_')
     {
-        --pitch_idx;
+        if (--pitch_idx < 0)
+        {
+            pitch_idx += 12;
+            --shift;
+        }
         c = _desc[++_cur_idx];
     }
 
