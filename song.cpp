@@ -3,56 +3,36 @@
 
 void Song::update()
 {
-    // Hz values for 4th octave (C, Db, D, Eb, E, F, Gb, G, Ab, A, Bb, B)
-    // equal tempered scale
+    // distance between half notes in equal tempered scale [ = 2**(1/12) ]
+    static const float half_factor = 1.0594630943592953;
+    // Hz values for ground tones in 4th octave (C, D, E, F, G, A, B)
+    // equal tempered scale, A = 440Hz
     static const float octave4[] = {
-        261.6255653005986, 277.1826309768721,  293.6647679174076,
-        311.1269837220809, 329.6275569128699,  349.2282314330039,
-        369.9944227116344, 391.99543598174927, 415.3046975799451,
-        440.0,             466.1637615180899,  493.8833012561241
+        261.6255653005986, 293.6647679174076,  329.6275569128699,
+        349.2282314330039, 391.99543598174927, 440.0, 493.8833012561241
     };
 
     if (finished() || --_cur_ms > 0)
         return;
 
-    int pitch_idx;
+    float pitch;
     int shift = _octave - 4;
     char c = _desc[_cur_idx];
-    switch (c)
+
+    if (c >= 'A' && c <= 'G')
     {
-        case 'A':
-        case 'B':
-            pitch_idx = 9 + 2 * (c - 'A');
-            break;
-        case 'C':
-        case 'D':
-        case 'E':
-            pitch_idx = 2 * (c - 'C');
-            break;
-        case 'F':
-        case 'G':
-            pitch_idx = 5 + 2 * (c - 'F');
-            break;
-        case 'a':
-        case 'b':
-            ++shift;
-            pitch_idx = 9 + 2 * (c - 'a');
-            break;
-        case 'c':
-        case 'd':
-        case 'e':
-            ++shift;
-            pitch_idx = 2 * (c - 'c');
-            break;
-        case 'f':
-        case 'g':
-            ++shift;
-            pitch_idx = 5 + 2 * (c - 'f');
-            break;
-        default:
-            // Error, stop interpreting this string
-            stop();
-            return;
+        pitch = octave4[c - 'A'];
+    }
+    else if (c >= 'a' && c <= 'g')
+    {
+        ++shift;
+        pitch = octave4[c - 'a'];
+    }
+    else
+    {
+        // Error, stop interpreting this string
+        stop();
+        return;
     }
 
     c = _desc[++_cur_idx];
@@ -69,22 +49,16 @@ void Song::update()
 
     if (c == '^')
     {
-        if (++pitch_idx >= 12)
-        {
-            pitch_idx -= 12;
-            ++shift;
-        }
+        pitch *= half_factor;
         c = _desc[++_cur_idx];
     }
     else if (c == '_')
     {
-        if (--pitch_idx < 0)
-        {
-            pitch_idx += 12;
-            --shift;
-        }
+        pitch /= half_factor;
         c = _desc[++_cur_idx];
     }
+
+    pitch = ldexp(pitch, shift);
 
     int lnum = 1, lden = 1;
     if (isDigit(c))
@@ -108,7 +82,6 @@ void Song::update()
         }
     }
 
-    float frequency = ldexp(octave4[pitch_idx], shift);
     _cur_ms = (_note_length*lnum) / lden;
-    tone(_pin, frequency, _cur_ms);
+    tone(_pin, pitch, _cur_ms);
 }
