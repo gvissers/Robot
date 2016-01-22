@@ -61,24 +61,20 @@ void loop()
         current_song = &popcorn_song;
     }
 
-    for (int i = 0; i < 255; ++i)
+    for (int i = 0; i < 128; ++i)
     {
-        engine.runStraight(i);
+        engine.moveForward(i);
         delay(10);
     }
-    for (int i = 255; i != 0; --i)
+    engine.turnLeftForward(128, 64);
+    delay(1000);
+    engine.halt();
+    delay(500);
+    engine.turnRightForward(128, 200);
+    delay(1000);
+    for (int i = 128; i != 0; --i)
     {
-        engine.runStraight(i);
-        delay(10);
-    }
-    for (int i = 0; i < 255; ++i)
-    {
-        engine.runStraight(-i);
-        delay(10);
-    }
-    for (int i = 255; i != 0; --i)
-    {
-        engine.runStraight(-i);
+        engine.moveForward(i);
         delay(10);
     }
 
