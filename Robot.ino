@@ -10,7 +10,7 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Engine engine(&AFMS);
 
 Song r2d2_song("AGECDBFcAGECDBFc", 100, 7);
-Song popcorn_song("aGaECEA,2aGaECEA,2abc'bc'ababgagafa2");
+Song popcorn_song("aGaECEA,zaGaECEA,zabc'bc'ababgagafa");
 
 Song* current_song = nullptr;
 

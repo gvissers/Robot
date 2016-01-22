@@ -78,6 +78,9 @@ private:
     int _cur_idx;
     /// Number of ms the current note still needs to play
     int _cur_ms;
+
+    /// Return the length in ms of the next note in the description
+    int _getLength();
 };
 
 #endif // SONG_H

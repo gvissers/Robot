@@ -15,10 +15,16 @@ void Song::update()
     if (finished() || --_cur_ms > 0)
         return;
 
+    char c = _desc[_cur_idx];
+    if (c == 'z' || c == 'x')
+    {
+        ++_cur_idx;
+        _cur_ms = _getLength();
+        return;
+    }
+
     float pitch;
     int shift = _octave - 4;
-    char c = _desc[_cur_idx];
-
     if (c >= 'A' && c <= 'G')
     {
         pitch = octave4[c - 'A'];
@@ -59,8 +65,15 @@ void Song::update()
     }
 
     pitch = ldexp(pitch, shift);
+    _cur_ms = _getLength();
+    tone(_pin, pitch, _cur_ms);
+}
 
+int Song::_getLength()
+{
+    char c = _desc[_cur_idx];
     int lnum = 1, lden = 1;
+
     if (isDigit(c))
     {
         lnum = (c - '0');
@@ -82,6 +95,5 @@ void Song::update()
         }
     }
 
-    _cur_ms = (_note_length*lnum) / lden;
-    tone(_pin, pitch, _cur_ms);
+    return (_note_length*lnum) / lden;
 }
