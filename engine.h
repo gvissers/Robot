@@ -1,7 +1,7 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include <Adafruit_MotorShield.h>
+#include "motorshield.h"
 
 class Engine
 {
@@ -47,22 +47,22 @@ private:
     Adafruit_DCMotor *_motor_right;
     uint8_t _directions;
 
-    void _setDirections(uint8_t left_dir, uint8_t right_dir);
+    void _setDirections(MotorDirection left_dir, MotorDirection right_dir);
     void _setSpeed(uint8_t left_speed, uint8_t right_speed)
     {
         _motor_left->setSpeed(left_speed);
         _motor_right->setSpeed(right_speed);
     }
 
-    void _move(uint8_t left_dir, uint8_t left_speed,
-        uint8_t right_dir, uint8_t right_speed)
+    void _move(MotorDirection left_dir, uint8_t left_speed,
+        MotorDirection right_dir, uint8_t right_speed)
     {
         _setDirections(left_dir, right_dir);
         _setSpeed(left_speed, right_speed);
     }
 
-    void _turnLeft(uint8_t speed, uint8_t turn_speed, uint8_t dir);
-    void _turnRight(uint8_t speed, uint8_t turn_speed, uint8_t dir);
+    void _turnLeft(uint8_t speed, uint8_t turn_speed, MotorDirection dir);
+    void _turnRight(uint8_t speed, uint8_t turn_speed, MotorDirection dir);
 };
 
 #endif // ENGINE_H

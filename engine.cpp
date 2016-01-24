@@ -3,7 +3,7 @@
 namespace
 {
 
-inline uint8_t reverseDirection(uint8_t dir)
+inline MotorDirection reverseDirection(MotorDirection dir)
 {
     switch (dir)
     {
@@ -43,7 +43,7 @@ void Engine::turn(int speed, int turn_speed)
     }
 }
 
-void Engine::_turnLeft(uint8_t speed, uint8_t turn_speed, uint8_t dir)
+void Engine::_turnLeft(uint8_t speed, uint8_t turn_speed, MotorDirection dir)
 {
     if (turn_speed <= 0x80)
         _move(dir, speed * (0x80-turn_speed) / 0x80, dir, speed);
@@ -51,7 +51,7 @@ void Engine::_turnLeft(uint8_t speed, uint8_t turn_speed, uint8_t dir)
         _move(reverseDirection(dir), speed * (turn_speed-0x80) / 0x7f, dir, speed);
 }
 
-void Engine::_turnRight(uint8_t speed, uint8_t turn_speed, uint8_t dir)
+void Engine::_turnRight(uint8_t speed, uint8_t turn_speed, MotorDirection dir)
 {
     if (turn_speed <= 0x80)
         _move(dir, speed, dir, speed * (0x80-turn_speed) / 0x80);
@@ -59,7 +59,7 @@ void Engine::_turnRight(uint8_t speed, uint8_t turn_speed, uint8_t dir)
         _move(dir, speed, reverseDirection(dir), speed * (turn_speed-0x80) / 0x7f);
 }
 
-void Engine::_setDirections(uint8_t left_dir, uint8_t right_dir)
+void Engine::_setDirections(MotorDirection left_dir, MotorDirection right_dir)
 {
     if ((_directions >> 3) != left_dir)
         _motor_left->run(left_dir);
