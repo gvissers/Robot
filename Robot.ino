@@ -3,7 +3,9 @@
 
 const bool debug = false;
 
-const int piezo_pin = 8;
+const int trig_pin = 2;  // Ultra-sound sensor trigger pin
+const int echo_pin = 4;  // Ultra-sound sensor echo pin
+const int piezo_pin = 8; // Piezo element pin
 
 // Create the motor shield object with the default I2C address
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
@@ -14,18 +16,7 @@ Song popcorn_song("aGaECEA,zaGaECEA,zabc'bc'ababgagafa");
 
 Song* current_song = nullptr;
 
-ISR(TIMER1_COMPA_vect)
-{
-    // timer1 interrupt 1kHz
-    if (current_song)
-    {
-        current_song->update();
-        if (current_song->finished())
-            current_song = nullptr;
-    }
-}
-
-void setup()
+void setupTimer()
 {
     noInterrupts();
 
@@ -46,6 +37,26 @@ void setup()
     TIMSK1 |= (1 << OCIE1A);
 
     interrupts();
+}
+
+ISR(TIMER1_COMPA_vect)
+{
+    // timer1 interrupt 1kHz
+    if (current_song)
+    {
+        current_song->update();
+        if (current_song->finished())
+            current_song = nullptr;
+    }
+}
+
+void setup()
+{
+    pinMode(trig_pin, OUTPUT);
+    pinMode(echo_pin, INPUT);
+    pinMode(piezo_pin, OUTPUT);
+
+    setupTimer();
 
     if (debug)
         Serial.begin(9600);
