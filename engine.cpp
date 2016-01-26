@@ -63,7 +63,7 @@ void Engine::_setDirections(MotorDirection left_dir, MotorDirection right_dir)
 {
     if ((_directions >> 3) != left_dir)
         _motor_left->run(left_dir);
-    if ((_directions & 7) != right_dir)
+    if ((_directions & 0x07) != right_dir)
         _motor_right->run(right_dir);
     _directions = (left_dir << 3) | right_dir;
 }
