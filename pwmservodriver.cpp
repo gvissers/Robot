@@ -1,3 +1,6 @@
+/* GV 2016-01-24: Based on code in Adafruit motorshield V2 library.
+ */
+
 /***************************************************
   This is a library for our Adafruit 16-channel PWM & Servo driver
 
