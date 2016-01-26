@@ -1,7 +1,7 @@
 #include "engine.h"
 #include "song.h"
 
-const bool debug = true;
+const bool debug = false;
 
 // Interval of timer1 interrupt in microseconds
 const uint16_t timer1_us = 50;
@@ -188,16 +188,12 @@ void loop()
     {
         case CRUISING:
             if (speed < 255)
-            {
-                speed = max(speed+1, 128);
-                engine.moveForward(speed);
-            }
+                engine.moveForward(++speed);
             break;
         case SLOW_1:
             if (speed < 127)
             {
-                speed = max(speed+1, 64);
-                engine.moveForward(speed);
+                engine.moveForward(++speed);
             }
             else if (speed > 127)
             {
@@ -208,8 +204,7 @@ void loop()
         case SLOW_2:
             if (speed < 63)
             {
-                speed = max(speed+1, 32);
-                engine.moveForward(speed);
+                engine.moveForward(++speed);
             }
             else if (speed > 63)
             {
@@ -224,6 +219,7 @@ void loop()
                 engine.halt();
             }
             engine.turnLeftForward(128, 255);
+            delay(630);
             break;
     }
 
@@ -237,5 +233,5 @@ void loop()
         Serial.println(speed);
     }
 
-    delay(20);
+    delay(10);
 }
