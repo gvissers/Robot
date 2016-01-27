@@ -6,7 +6,7 @@
 class Eyes
 {
 public:
-    Eyes(): _US_pulse_on(false), _current_tick(1), _US_last_distance(0) {}
+    Eyes(): _current_tick(1), _US_pulse_on(false), _US_last_distance(0) {}
 
     void ultrasoundTick();
     void handleUltrasoundEcho();
