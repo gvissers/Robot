@@ -1,20 +1,9 @@
 #include "engine.h"
+#include "eyes.h"
+#include "settings.h"
 #include "song.h"
 
 const bool debug = false;
-
-// Interval of timer1 interrupt in microseconds
-const uint16_t timer1_us = 50;
-// number of timer ticks for music update
-const uint16_t music_ticks = 1000 / timer1_us;
-// Trigger distance sensor every trigger_ticks ticks
-const uint16_t trigger_ticks = 100000ul / timer1_us;
-// Maximum valid distance reading, values above this are ignored
-const uint16_t max_dist = 500;
-
-const int trigger_pin = 3; // Distance sensor trigger pin
-const int echo_pin = 2;    // Distance sensor echo pin
-const int piezo_pin = 8;   // Piezo element pin
 
 // Create the motor shield object with the default I2C address
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
@@ -24,11 +13,9 @@ Song r2d2_song("AGECDBFcAGECDBFc", 100, 7);
 Song popcorn_song("aGaECEA,zaGaECEA,zabc'bc'ababgagafa");
 Song* current_song = nullptr;
 
-volatile uint16_t cur_music_tick = 1;
-volatile uint16_t cur_trigger_tick = 1;
+Eyes eyes;
 
-volatile uint32_t echo_start = 0;
-volatile uint16_t last_distance = 0;
+volatile uint16_t cur_music_tick = 1;
 
 enum DriveState
 {
@@ -90,28 +77,6 @@ void updateMusic()
     }
 }
 
-void triggerDistancePulse()
-{
-    static volatile uint8_t pulse_state = 0;
-
-    if (--cur_trigger_tick == 0)
-    {
-        cur_trigger_tick = trigger_ticks;
-        pulse_state = 1;
-    }
-
-    if (pulse_state == 1)
-    {
-        digitalWrite(trigger_pin, HIGH);
-        pulse_state = 2;
-    }
-    else if (pulse_state == 2)
-    {
-        digitalWrite(trigger_pin, LOW);
-        pulse_state = 0;
-    }
-}
-
 ISR(TIMER1_COMPA_vect)
 {
     // Update music
@@ -121,30 +86,7 @@ ISR(TIMER1_COMPA_vect)
         updateMusic();
     }
 
-    triggerDistancePulse();
-}
-
-inline uint16_t echoToCentimeter(uint32_t us)
-{
-    // Sound of speed under normal conditions is 340 m/s
-    // Divide by two since the echo pulse has to travel back and forth
-    return (17*us) / 1000;
-}
-
-void handleDistanceEcho()
-{
-    if (digitalRead(echo_pin) == HIGH)
-    {
-        // Start of echo pulse
-        echo_start = micros();
-    }
-    else
-    {
-        // End of echo pulse
-        uint16_t dist = echoToCentimeter(micros() - echo_start);
-        if (dist <= max_dist)
-            last_distance = dist;
-    }
+    eyes.ultrasoundTick();
 }
 
 void setup()
@@ -152,13 +94,14 @@ void setup()
     if (debug)
         Serial.begin(9600);
 
-    pinMode(trigger_pin, OUTPUT);
-    pinMode(echo_pin, INPUT);
+    pinMode(US_trigger_pin, OUTPUT);
+    pinMode(US_echo_pin, INPUT);
     pinMode(piezo_pin, OUTPUT);
 
     setupTimer(timer1_us);
 
-    attachInterrupt(digitalPinToInterrupt(echo_pin), handleDistanceEcho, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(US_echo_pin),
+        []() { eyes.handleUltrasoundEcho(); }, CHANGE);
 
     AFMS.begin();  // create with the default frequency 1.6KHz
 }
@@ -174,7 +117,7 @@ void loop()
         //current_song = &popcorn_song;
     }
 
-    uint16_t dist = last_distance;
+    uint16_t dist = eyes.distance();
     if (dist > 100)
         state = CRUISING;
     else if (dist > 60)
