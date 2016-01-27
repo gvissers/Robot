@@ -7,6 +7,8 @@ const uint16_t timer1_us = 50;
 const uint16_t music_ticks = 1000 / timer1_us;
 // Trigger distance sensor every trigger_ticks ticks
 const uint16_t US_trigger_ticks = 100000ul / timer1_us;
+/// Maximum valid ultrasound distance reading, values above this are ignored
+const uint16_t US_max_distance = 500;
 
 const uint8_t US_trigger_pin = 3; // Distance sensor trigger pin
 const uint8_t US_echo_pin = 2;    // Distance sensor echo pin

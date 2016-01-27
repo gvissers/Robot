@@ -40,7 +40,7 @@ void Eyes::handleUltrasoundEcho()
     {
         // End of echo pulse
         uint16_t dist = echoToCentimeter(now - _US_echo_start);
-        if (dist <= _US_max_distance)
+        if (dist <= US_max_distance)
             _US_last_distance = dist;
     }
 }
