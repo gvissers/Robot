@@ -7,7 +7,7 @@ void Song::update()
     static const float half_factor = 1.0594630943592953;
     // Hz values for ground tones in 4th octave (C, D, E, F, G, A, B)
     // equal tempered scale, A = 440Hz
-    static const float octave4[] = {
+    static const float octave4[] PROGMEM = {
         440.0, 493.8833012561241, 261.6255653005986, 293.6647679174076,
         329.6275569128699, 349.2282314330039, 391.99543598174927,
     };
@@ -27,12 +27,12 @@ void Song::update()
     int shift = _octave - 4;
     if (c >= 'A' && c <= 'G')
     {
-        pitch = octave4[c - 'A'];
+        pitch = pgm_read_float(octave4 + (c-'A'));
     }
     else if (c >= 'a' && c <= 'g')
     {
         ++shift;
-        pitch = octave4[c - 'a'];
+        pitch = pgm_read_float(octave4 + (c-'a'));
     }
     else
     {
