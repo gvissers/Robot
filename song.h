@@ -39,20 +39,20 @@ public:
     void start(int pin)
     {
         _pin = pin;
-        _cur_idx = 0;
+        _cur_char = _desc;
         _cur_ms = 0;
     }
     /// Stop playing this tune
     void stop()
     {
-        while (_desc[_cur_idx])
-            ++_cur_idx;
+        while (!finished())
+            ++_cur_char;
         _cur_ms = 0;
     }
     /// Return \c true if this tune has finished playing, \c false otherwise
     bool finished() const
     {
-        return !_desc[_cur_idx];
+        return !pgm_read_byte(_cur_char);
     }
 
     /**
@@ -74,8 +74,8 @@ private:
 
     /// Piezo pin number on which to play
     int _pin;
-    /// Index in the description string of the next note to play
-    int _cur_idx;
+    /// Pointer in the description string to the next note to play
+    const char* _cur_char;
     /// Number of ms the current note still needs to play
     int _cur_ms;
 

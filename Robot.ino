@@ -9,8 +9,10 @@ const bool debug = false;
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Engine engine(&AFMS);
 
-Song r2d2_song("AGECDBFcAGECDBFc", 100, 7);
-Song popcorn_song("aGaECEA,zaGaECEA,zabc'bc'ababgagafa");
+const char r2d2_desc[] PROGMEM = "AGECDBFcAGECDBFc";
+const char popcorn_desc[] PROGMEM = "aGaECEA,zaGaECEA,zabc'bc'ababgagafa";
+Song r2d2_song(r2d2_desc, 100, 7);
+Song popcorn_song(popcorn_desc);
 Song* current_song = nullptr;
 
 Eyes eyes;

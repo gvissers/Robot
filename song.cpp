@@ -15,10 +15,10 @@ void Song::update()
     if (finished() || --_cur_ms > 0)
         return;
 
-    char c = _desc[_cur_idx];
+    char c = pgm_read_byte(_cur_char);
     if (c == 'z' || c == 'x')
     {
-        ++_cur_idx;
+        ++_cur_char;
         _cur_ms = _getLength();
         return;
     }
@@ -41,27 +41,27 @@ void Song::update()
         return;
     }
 
-    c = _desc[++_cur_idx];
+    c = pgm_read_byte(++_cur_char);
     if (c == ',')
     {
         --shift;
-        c = _desc[++_cur_idx];
+        c = pgm_read_byte(++_cur_char);
     }
     else if (c == '\'')
     {
         ++shift;
-        c = _desc[++_cur_idx];
+        c = pgm_read_byte(++_cur_char);
     }
 
     if (c == '^')
     {
         pitch *= half_factor;
-        c = _desc[++_cur_idx];
+        c = pgm_read_byte(++_cur_char);
     }
     else if (c == '_')
     {
         pitch /= half_factor;
-        c = _desc[++_cur_idx];
+        c = pgm_read_byte(++_cur_char);
     }
 
     pitch = ldexp(pitch, shift);
@@ -71,27 +71,27 @@ void Song::update()
 
 int Song::_getLength()
 {
-    char c = _desc[_cur_idx];
+    char c = pgm_read_byte(_cur_char);
     int lnum = 1, lden = 1;
 
     if (isDigit(c))
     {
         lnum = (c - '0');
-        c = _desc[++_cur_idx];
+        c = pgm_read_byte(++_cur_char);
     }
     if (c == '/')
     {
         lden = 2;
-        c = _desc[++_cur_idx];
+        c = pgm_read_byte(++_cur_char);
         if (c == '/')
         {
             lden = 4;
-            c = _desc[++_cur_idx];
+            c = pgm_read_byte(++_cur_char);
         }
         else if (isDigit(c))
         {
             lden = (c - '0');
-            c = _desc[++_cur_idx];
+            c = pgm_read_byte(++_cur_char);
         }
     }
 
