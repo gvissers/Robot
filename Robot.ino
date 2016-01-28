@@ -17,7 +17,7 @@ Song* current_song = nullptr;
 
 Eyes eyes;
 
-volatile uint16_t cur_music_tick = 1;
+volatile bool update_music_now = false;
 
 enum DriveState
 {
@@ -75,17 +75,22 @@ void updateMusic()
     {
         current_song->update();
         if (current_song->finished())
-            current_song = nullptr;
+        {
+            popcorn_song.start(piezo_pin);
+            current_song = &popcorn_song;
+        }
     }
 }
 
 ISR(TIMER1_COMPA_vect)
 {
+    static uint16_t cur_music_tick = 1;
+
     // Update music
     if (--cur_music_tick == 0)
     {
         cur_music_tick = music_ticks;
-        updateMusic();
+        update_music_now = true;
     }
 
     eyes.ultrasoundTick();
@@ -106,17 +111,29 @@ void setup()
         []() { eyes.handleUltrasoundEcho(); }, CHANGE);
 
     AFMS.begin();  // create with the default frequency 1.6KHz
+
+    r2d2_song.start(piezo_pin);
+    current_song = &r2d2_song;
 }
 
 void loop()
 {
     static DriveState state = HALT;
     static uint8_t speed = 0;
+    static uint32_t sleep_until = 0;
 
-    if (!current_song)
+    uint32_t now = millis();
+
+    if (update_music_now)
     {
-        popcorn_song.start(piezo_pin);
-        current_song = &popcorn_song;
+        update_music_now = false;
+        updateMusic();
+    }
+
+    if (now < sleep_until)
+    {
+        delay(1);
+        return;
     }
 
     uint16_t dist = eyes.distance();
@@ -134,6 +151,7 @@ void loop()
         case CRUISING:
             if (speed < 255)
                 engine.moveForward(++speed);
+            sleep_until = now + 10;
             break;
         case SLOW_1:
             if (speed < 127)
@@ -145,6 +163,7 @@ void loop()
                 speed = min(speed-1, 192);
                 engine.moveForward(speed);
             }
+            sleep_until = now + 10;
             break;
         case SLOW_2:
             if (speed < 63)
@@ -156,6 +175,7 @@ void loop()
                 speed = min(speed-1, 98);
                 engine.moveForward(speed);
             }
+            sleep_until = now + 10;
             break;
         case TURNING:
             if (speed > 0)
@@ -164,19 +184,17 @@ void loop()
                 engine.halt();
             }
             engine.turnLeftForward(128, 255);
-            delay(630);
+            sleep_until = now + 640;
             break;
     }
 
-    if (debug)
-    {
-        Serial.print("dist = ");
-        Serial.print(dist);
-        Serial.print(", state = ");
-        Serial.print(state);
-        Serial.print(", speed = ");
-        Serial.println(speed);
-    }
-
-    delay(10);
+//     if (debug)
+//     {
+//         Serial.print("dist = ");
+//         Serial.print(dist);
+//         Serial.print(", state = ");
+//         Serial.print(state);
+//         Serial.print(", speed = ");
+//         Serial.println(speed);
+//     }
 }
