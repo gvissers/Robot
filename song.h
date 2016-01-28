@@ -29,7 +29,6 @@ public:
     Song(const char* desc, int note_length=250, int octave=4):
         _desc(desc), _note_length(note_length), _octave(octave) {}
 
-
     /**
      * Start playing the tune
      *
@@ -43,17 +42,9 @@ public:
         _cur_ms = 0;
     }
     /// Stop playing this tune
-    void stop()
-    {
-        while (!finished())
-            ++_cur_char;
-        _cur_ms = 0;
-    }
+    void stop() { _cur_ms = -1; }
     /// Return \c true if this tune has finished playing, \c false otherwise
-    bool finished() const
-    {
-        return !pgm_read_byte(_cur_char);
-    }
+    bool finished() const { return _cur_ms < 0; }
 
     /**
      * Update the current playing position
@@ -76,7 +67,7 @@ private:
     int _pin;
     /// Pointer in the description string to the next note to play
     const char* _cur_char;
-    /// Number of ms the current note still needs to play
+    /// Number of ms the current note still needs to play, or -1 when song has finished.
     int _cur_ms;
 
     /// Return the length in ms of the next note in the description

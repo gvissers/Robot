@@ -36,7 +36,7 @@ void Song::update()
     }
     else
     {
-        // Error, stop interpreting this string
+        // End or error, stop interpreting this string
         stop();
         return;
     }

@@ -10,7 +10,7 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Engine engine(&AFMS);
 
 const char r2d2_desc[] PROGMEM = "AGECDBFcAGECDBFc";
-const char popcorn_desc[] PROGMEM = "aGaECEA,zaGaECEA,zabc'bc'ababgagafa";
+const char popcorn_desc[] PROGMEM = "aGaECEA,zaGaECEA,zabc'bc'ababgagafaz";
 Song r2d2_song(r2d2_desc, 100, 7);
 Song popcorn_song(popcorn_desc);
 Song* current_song = nullptr;
@@ -115,8 +115,8 @@ void loop()
 
     if (!current_song)
     {
-        //popcorn_song.start(piezo_pin);
-        //current_song = &popcorn_song;
+        popcorn_song.start(piezo_pin);
+        current_song = &popcorn_song;
     }
 
     uint16_t dist = eyes.distance();
