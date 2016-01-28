@@ -29,15 +29,9 @@ public:
     Song(const char* desc, int note_length=250, int octave=4):
         _desc(desc), _note_length(note_length), _octave(octave) {}
 
-    /**
-     * Start playing the tune
-     *
-     * Start playing this tune, on piezo pin \a pin.
-     * \param pin The pin number to which the piezo element is attached.
-     */
-    void start(int pin)
+    /// Start or restart playing the tune
+    void start()
     {
-        _pin = pin;
         _cur_char = _desc;
         _cur_ms = 0;
     }
@@ -63,8 +57,6 @@ private:
     /// Octave offset of the tune
     int _octave;
 
-    /// Piezo pin number on which to play
-    int _pin;
     /// Pointer in the description string to the next note to play
     const char* _cur_char;
     /// Number of ms the current note still needs to play, or -1 when song has finished.

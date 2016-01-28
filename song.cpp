@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "settings.h"
 #include "song.h"
 
 void Song::update()
@@ -66,7 +67,7 @@ void Song::update()
 
     pitch = ldexp(pitch, shift);
     _cur_ms = _getLength();
-    tone(_pin, pitch, _cur_ms);
+    tone(piezo_pin, pitch, _cur_ms);
 }
 
 int Song::_getLength()

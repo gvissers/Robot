@@ -76,7 +76,7 @@ void updateMusic()
         current_song->update();
         if (current_song->finished())
         {
-            popcorn_song.start(piezo_pin);
+            popcorn_song.start();
             current_song = &popcorn_song;
         }
     }
@@ -112,7 +112,7 @@ void setup()
 
     AFMS.begin();  // create with the default frequency 1.6KHz
 
-    r2d2_song.start(piezo_pin);
+    r2d2_song.start();
     current_song = &r2d2_song;
 }
 
