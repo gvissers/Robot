@@ -137,55 +137,35 @@ void loop()
     }
 
     uint16_t dist = eyes.distance();
+    sleep_until = now + 10;
     if (dist > 100)
-        state = CRUISING;
-    else if (dist > 60)
-        state = SLOW_1;
-    else if (dist > 20)
-        state = SLOW_2;
-    else
-        state = TURNING;
-
-    switch (state)
     {
-        case CRUISING:
-            if (speed < 255)
-                engine.moveForward(++speed);
-            sleep_until = now + 10;
-            break;
-        case SLOW_1:
-            if (speed < 127)
-            {
-                engine.moveForward(++speed);
-            }
-            else if (speed > 127)
-            {
-                speed = min(speed-1, 192);
-                engine.moveForward(speed);
-            }
-            sleep_until = now + 10;
-            break;
-        case SLOW_2:
-            if (speed < 63)
-            {
-                engine.moveForward(++speed);
-            }
-            else if (speed > 63)
-            {
-                speed = min(speed-1, 98);
-                engine.moveForward(speed);
-            }
-            sleep_until = now + 10;
-            break;
-        case TURNING:
-            if (speed > 0)
-            {
-                speed = 0;
-                engine.halt();
-            }
-            engine.turnLeftForward(128, 255);
-            sleep_until = now + 640;
-            break;
+        if (speed < 255)
+            engine.moveForward(++speed);
+    }
+    else if (dist > 60)
+    {
+        if (speed < 127)
+            engine.moveForward(++speed);
+        else if (speed > 127)
+            engine.moveForward(--speed);
+    }
+    else if (dist > 20)
+    {
+        if (speed < 63)
+            engine.moveForward(++speed);
+        else if (speed > 63)
+            engine.moveForward(--speed);
+    }
+    else
+    {
+        if (speed > 0)
+        {
+            speed = 0;
+            engine.halt();
+        }
+        engine.turnLeftForward(128, 255);
+        sleep_until = now + 640;
     }
 
 //     if (debug)
