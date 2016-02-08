@@ -131,10 +131,7 @@ void loop()
     }
 
     if (now < sleep_until)
-    {
-        delay(1);
         return;
-    }
 
     uint16_t dist = eyes.distance();
     sleep_until = now + 10;
