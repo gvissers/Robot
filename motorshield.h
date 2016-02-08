@@ -28,6 +28,20 @@
 
 #define MICROSTEPS 16         // 8 or 16
 
+enum DCMotorName
+{
+	DC_MOTOR_1,
+	DC_MOTOR_2,
+	DC_MOTOR_3,
+	DC_MOTOR_4
+};
+
+enum StepperName
+{
+    STEPPER_1,
+    STEPPER_2
+};
+
 enum MotorDirection : uint8_t
 {
     FORWARD = 1,
@@ -104,11 +118,11 @@ public:
     {
         _pwm.setPWM(pin, (val == LOW ? 0 : 4096), 0);
     }
-    Adafruit_DCMotor *getMotor(uint8_t num)
+    Adafruit_DCMotor *getMotor(DCMotorName name)
     {
-        return (num == 0 || num > 4) ? nullptr : (_dcmotors + (num-1));
+        return name >= 4 ? nullptr : (_dcmotors + name);
     }
-    Adafruit_StepperMotor *getStepper(uint16_t steps, uint8_t num);
+    Adafruit_StepperMotor *getStepper(uint16_t steps, StepperName name);
 
 private:
     uint8_t _addr;

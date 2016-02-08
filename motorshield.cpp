@@ -62,12 +62,13 @@ void Adafruit_MotorShield::setPWM(uint8_t pin, uint16_t value)
         _pwm.setPWM(pin, 0, value);
 }
 
-Adafruit_StepperMotor *Adafruit_MotorShield::getStepper(uint16_t steps, uint8_t num)
+Adafruit_StepperMotor *Adafruit_MotorShield::getStepper(uint16_t steps,
+    StepperName name)
 {
-    if (num == 0 || num > 2)
+    if (name >= 2)
         return nullptr;
 
-    Adafruit_StepperMotor *stepper = _steppers + (num-1);
+    Adafruit_StepperMotor *stepper = _steppers + name;
     stepper->setStepsPerRev(steps);
     return stepper;
 }

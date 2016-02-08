@@ -22,7 +22,8 @@ public:
      * of the motor shield.
      */
     Engine(Adafruit_MotorShield *shield):
-        _motor_left(shield->getMotor(1)), _motor_right(shield->getMotor(2)),
+        _motor_left(shield->getMotor(DC_MOTOR_1)),
+        _motor_right(shield->getMotor(DC_MOTOR_2)),
         _directions((RELEASE << 3) | RELEASE) {}
 
     /// Halt the robot, releasing both motors
