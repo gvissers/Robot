@@ -28,7 +28,7 @@
 
 #define MICROSTEPS 16         // 8 or 16
 
-enum DCMotorName
+enum DCMotorName: uint8_t
 {
 	DC_MOTOR_1,
 	DC_MOTOR_2,
@@ -36,13 +36,13 @@ enum DCMotorName
 	DC_MOTOR_4
 };
 
-enum StepperName
+enum StepperName: uint8_t
 {
     STEPPER_1,
     STEPPER_2
 };
 
-enum MotorDirection : uint8_t
+enum MotorDirection: uint8_t
 {
     FORWARD = 1,
     BACKWARD,
