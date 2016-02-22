@@ -58,7 +58,7 @@ struct adafruit_bno055_offsets_t
     uint16_t mag_radius;
 };
 
-class Adafruit_BNO055 : public Adafruit_Sensor
+class Adafruit_BNO055: public Adafruit_Sensor
 {
 public:
     enum adafruit_bno055_reg_t
@@ -358,7 +358,10 @@ public:
     /// Writes to the sensor's offset registers from an offset struct \a offsets
     void setSensorOffsets(const adafruit_bno055_offsets_t &offsets);
     /// Check whether all sensors are initialized
-    bool  isFullyCalibrated() const;
+    bool  isFullyCalibrated() const
+    {
+        return read8(BNO055_CALIB_STAT_ADDR) == 0xff;
+    }
 
 private:
     /// Read an 8 bit value from register \a reg over I2C

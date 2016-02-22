@@ -405,15 +405,6 @@ void Adafruit_BNO055::setSensorOffsets(const adafruit_bno055_offsets_t& offsets)
     setMode(lastMode);
 }
 
-bool Adafruit_BNO055::isFullyCalibrated() const
-{
-    uint8_t system, gyro, accel, mag;
-    getCalibration(&system, &gyro, &accel, &mag);
-    if (system < 3 || gyro < 3 || accel < 3 || mag < 3)
-        return false;
-    return true;
-}
-
 
 /***************************************************************************
  PRIVATE FUNCTIONS
