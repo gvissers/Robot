@@ -20,10 +20,10 @@
 #ifndef IMUMATH_MATRIX_HPP
 #define IMUMATH_MATRIX_HPP
 
-#include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-#include <math.h>
+
+#include "vector.h"
 
 namespace imu
 {
@@ -34,213 +34,169 @@ template <uint8_t N> class Matrix
 public:
     Matrix()
     {
-        int r = sizeof(double)*N;
-        _cell = &_cell_data[0];
-        memset(_cell, 0, r*r);
+        memset(_cell_data, 0, N*N*sizeof(double));
     }
 
-    Matrix(const Matrix &v)
+    Matrix(const Matrix &m)
     {
-        int r = sizeof(double)*N;
-        _cell = &_cell_data[0];
-        memset(_cell, 0, r*r);
-        for (int x = 0; x < N; x++ )
-        {
-            for(int y = 0; y < N; y++)
-            {
-                _cell[x*N+y] = v._cell[x*N+y];
-            }
-        }
+        for (int ij = 0; ij < N*N; ++ij)
+            _cell_data[ij] = m._cell_data[ij];
     }
 
-    ~Matrix()
+    Matrix& operator=(const Matrix& m)
     {
+        for (int ij = 0; ij < N*N; ++ij)
+            _cell_data[ij] = m._cell_data[ij];
+        return *this;
     }
 
-    void operator = (Matrix m)
-    {
-        for(int x = 0; x < N; x++)
-        {
-            for(int y = 0; y < N; y++)
-            {
-                cell(x, y) = m.cell(x, y);
-            }
-        }
-    }
-
-    Vector<N> row_to_vector(int y)
+    Vector<N> getRow(int i) const
     {
         Vector<N> ret;
-        for(int i = 0; i < N; i++)
-        {
-            ret[i] = _cell[y*N+i];
-        }
+        for (int j = 0; j < N; ++j)
+            ret[j] = cell(i, j);
         return ret;
     }
 
-    Vector<N> col_to_vector(int x)
+    Vector<N> getColumn(int j) const
     {
         Vector<N> ret;
-        for(int i = 0; i < N; i++)
-        {
-            ret[i] = _cell[i*N+x];
-        }
+        for (int i = 0; i < N; ++i)
+            ret[i] = cell(i, j);
         return ret;
     }
 
-    void vector_to_row(Vector<N> v, int row)
+    void setRow(const Vector<N>& v, int i)
     {
-        for(int i = 0; i < N; i++)
-        {
-            cell(row, i) = v(i);
-        }
+        for (int j = 0; j < N; ++j)
+            cell(i, j) = v[j];
     }
 
-    void vector_to_col(Vector<N> v, int col)
+    void setColumn(const Vector<N>& v, int j)
     {
-        for(int i = 0; i < N; i++)
-        {
-            cell(i, col) = v(i);
-        }
+        for (int i = 0; i < N; i++)
+            cell(i, j) = v[i];
     }
 
-    double& operator ()(int x, int y)
+    double operator()(int i, int j) const
     {
-        return _cell[x*N+y];
+        return cell(i, j);
+    }
+    double& operator()(int i, int j)
+    {
+        return cell(i, j);
     }
 
-    double& cell(int x, int y)
+    double cell(int i, int j) const
     {
-        return _cell[x*N+y];
+        return _cell_data[i*N+j];
+    }
+    double& cell(int i, int j)
+    {
+        return _cell_data[i*N+j];
     }
 
-
-    Matrix operator + (Matrix m)
+    Matrix operator+(const Matrix& m) const
     {
         Matrix ret;
-        for(int x = 0; x < N; x++)
-        {
-            for(int y = 0; y < N; y++)
-            {
-                ret._cell[x*N+y] = _cell[x*N+y] + m._cell[x*N+y];
-            }
-        }
+        for (int ij = 0; ij < N*N; ++ij)
+            ret._cell_data[ij] = _cell_data[ij] + m._cell_data[ij];
         return ret;
     }
 
-    Matrix operator - (Matrix m)
+    Matrix operator-(const Matrix& m) const
     {
         Matrix ret;
-        for(int x = 0; x < N; x++)
-        {
-            for(int y = 0; y < N; y++)
-            {
-                ret._cell[x*N+y] = _cell[x*N+y] - m._cell[x*N+y];
-            }
-        }
+        for (int ij = 0; ij < N*N; ++ij)
+            ret._cell_data[ij] = _cell_data[ij] - m._cell_data[ij];
         return ret;
     }
 
-    Matrix operator * (double scalar)
+    Matrix operator*(double scalar) const
     {
         Matrix ret;
-        for(int x = 0; x < N; x++)
-        {
-            for(int y = 0; y < N; y++)
-            {
-                ret._cell[x*N+y] = _cell[x*N+y] * scalar;
-            }
-        }
+        for (int ij = 0; ij < N*N; ++ij)
+            ret._cell_data[ij] = _cell_data[ij] * scalar;
         return ret;
     }
 
-    Matrix operator * (Matrix m)
+    Matrix operator*(const Matrix& m) const
     {
         Matrix ret;
-        for(int x = 0; x < N; x++)
+        for (int i = 0; i < N; ++i)
         {
-            for(int y = 0; y < N; y++)
-            {
-                Vector<N> row = row_to_vector(x);
-                Vector<N> col = m.col_to_vector(y);
-                ret.cell(x, y) = row.dot(col);
-            }
+            Vector<N> row = getRow(i);
+            for (int j = 0; j < N; ++j)
+                ret(i, j) = row.dot(m.getColumn(j));
         }
         return ret;
     }
 
-    Matrix transpose()
+    Matrix transposed() const
     {
         Matrix ret;
-        for(int x = 0; x < N; x++)
+        for (int i = 0; i < N; ++i)
         {
-            for(int y = 0; y < N; y++)
-            {
-                ret.cell(y, x) = cell(x, y);
-            }
+            for (int j = 0; j < N; ++j)
+                ret(j, i) = cell(i, j);
         }
         return ret;
     }
 
-    Matrix<N-1> minor_matrix(int row, int col)
+    Matrix<N-1> minor(int row, int col) const
     {
-        int colCount = 0, rowCount = 0;
+        int im, jm;
         Matrix<N-1> ret;
-        for(int i = 0; i < N; i++ )
+        for (int i = 0, im = 0; i < N; ++i)
         {
-            if( i != row )
+            if (i == row)
+                continue;
+
+            for (int j = 0, jm = 0; j < N; ++j)
             {
-                for(int j = 0; j < N; j++ )
-                {
-                    if( j != col )
-                    {
-                        ret(rowCount, colCount) = cell(i, j);
-                        colCount++;
-                    }
-                }
-                rowCount++;
+                if (j != col)
+                    ret(im, jm++) = cell(i, j);
             }
+            ++im;
         }
         return ret;
     }
 
-    double determinant()
+    double determinant() const
     {
-        if(N == 1)
-            return cell(0, 0);
-
-        float det = 0.0;
-        for(int i = 0; i < N; i++ )
-        {
-            Matrix<N-1> minor = minor_matrix(0, i);
-            det += (i%2==1?-1.0:1.0) * cell(0, i) * minor.determinant();
-        }
+        // specialization for N == 1 given below this class
+        double det = 0.0, sign = 1.0;
+        for (int i = 0; i < N; ++i, sign = -sign)
+            det += sign * cell(0, i) * minor(0, i).determinant();
         return det;
     }
 
-    Matrix invert()
+    Matrix inverted() const
     {
         Matrix ret;
-        float det = determinant();
+        double det = determinant();
 
-        for(int x = 0; x < N; x++)
+        for (int i = 0; i < N; i++)
         {
-            for(int y = 0; y < N; y++)
+            for (int j = 0; j < N; j++)
             {
-                Matrix<N-1> minor = minor_matrix(y, x);
-                ret(x, y) = det*minor.determinant();
-                if( (x+y)%2 == 1)
-                    ret(x, y) = -ret(x, y);
+                ret(i, j) = minor(j, i).determinant() / det;
+                if ( (i+j)%2 == 1)
+                    ret(i, j) = -ret(i, j);
             }
         }
         return ret;
     }
 
 private:
-    double* _cell;
-    double  _cell_data[N*N];
+    double _cell_data[N*N];
 };
 
+template<>
+inline double Matrix<1>::determinant() const
+{
+    return cell(0, 0);
+}
 
 };
 
