@@ -26,7 +26,7 @@
 #include <stdint.h>
 #include <math.h>
 
-#include "vector.h"
+#include "matrix.h"
 
 
 namespace imu
@@ -37,27 +37,13 @@ namespace imu
 class Quaternion
 {
 public:
-    Quaternion()
-    {
-        _w = 1.0;
-        _x = _y = _z = 0.0;
-    }
+    Quaternion(): _w(1.0), _x(0.0), _y(0.0), _z(0.0) {}
 
-    Quaternion(double iw, double ix, double iy, double iz)
-    {
-        _w = iw;
-        _x = ix;
-        _y = iy;
-        _z = iz;
-    }
+    Quaternion(double w, double x, double y, double z):
+        _w(w), _x(x), _y(y), _z(z) {}
 
-    Quaternion(double w, Vector<3> vec)
-    {
-        _w = w;
-        _x = vec.x();
-        _y = vec.y();
-        _z = vec.z();
-    }
+    Quaternion(double w, Vector<3> vec):
+        _w(w), _x(vec.x()), _y(vec.y()), _z(vec.z()) {}
 
     double& w()
     {
@@ -95,28 +81,23 @@ public:
 
     double magnitude() const
     {
-        double res = (_w*_w) + (_x*_x) + (_y*_y) + (_z*_z);
-        return sqrt(res);
+        return sqrt(_w*_w + _x*_x + _y*_y + _z*_z);
     }
 
+    // XXX
     void normalize()
     {
         double mag = magnitude();
-        *this = this->scale(1/mag);
+        *this = this->scaled(1/mag);
     }
 
 
     Quaternion conjugate() const
     {
-        Quaternion q;
-        q.w() = _w;
-        q.x() = -_x;
-        q.y() = -_y;
-        q.z() = -_z;
-        return q;
+        return Quaternion(_w, -_x, -_y, -_z);
     }
 
-    void fromAxisAngle(Vector<3> axis, double theta)
+    void fromAxisAngle(const Vector<3>& axis, double theta)
     {
         _w = cos(theta/2);
         //only need to calculate sine of half theta once
@@ -126,11 +107,11 @@ public:
         _z = axis.z() * sht;
     }
 
-    void fromMatrix(Matrix<3> m)
+    void fromMatrix(const Matrix<3>& m)
     {
-        float tr = m(0, 0) + m(1, 1) + m(2, 2);
+        double tr = m.trace();
 
-        float S = 0.0;
+        double S;
         if (tr > 0)
         {
             S = sqrt(tr+1.0) * 2;
@@ -139,7 +120,7 @@ public:
             _y = (m(0, 2) - m(2, 0)) / S;
             _z = (m(1, 0) - m(0, 1)) / S;
         }
-        else if ((m(0, 0) < m(1, 1))&(m(0, 0) < m(2, 2)))
+        else if (m(0, 0) > m(1, 1) && m(0, 0) > m(2, 2))
         {
             S = sqrt(1.0 + m(0, 0) - m(1, 1) - m(2, 2)) * 2;
             _w = (m(2, 1) - m(1, 2)) / S;
@@ -147,7 +128,7 @@ public:
             _y = (m(0, 1) + m(1, 0)) / S;
             _z = (m(0, 2) + m(2, 0)) / S;
         }
-        else if (m(1, 1) < m(2, 2))
+        else if (m(1, 1) > m(2, 2))
         {
             S = sqrt(1.0 + m(1, 1) - m(0, 0) - m(2, 2)) * 2;
             _w = (m(0, 2) - m(2, 0)) / S;
@@ -165,10 +146,10 @@ public:
         }
     }
 
-    void toAxisAngle(Vector<3>& axis, float& angle) const
+    void toAxisAngle(Vector<3>& axis, double& angle) const
     {
-        float sqw = sqrt(1-_w*_w);
-        if(sqw == 0) //it's a singularity and divide by zero, avoid
+        double sqw = sqrt(1 - _w*_w);
+        if (sqw == 0) //it's a singularity and divide by zero, avoid
             return;
 
         angle = 2 * acos(_w);
@@ -180,17 +161,17 @@ public:
     Matrix<3> toMatrix() const
     {
         Matrix<3> ret;
-        ret.cell(0, 0) = 1-(2*(_y*_y))-(2*(_z*_z));
-        ret.cell(0, 1) = (2*_x*_y)-(2*_w*_z);
-        ret.cell(0, 2) = (2*_x*_z)+(2*_w*_y);
+        ret.cell(0, 0) = 1 - 2*_y*_y - 2*_z*_z;
+        ret.cell(0, 1) = 2*_x*_y - 2*_w*_z;
+        ret.cell(0, 2) = 2*_x*_z + 2*_w*_y;
 
-        ret.cell(1, 0) = (2*_x*_y)+(2*_w*_z);
-        ret.cell(1, 1) = 1-(2*(_x*_x))-(2*(_z*_z));
-        ret.cell(1, 2) = (2*(_y*_z))-(2*(_w*_x));
+        ret.cell(1, 0) = 2*_x*_y + 2*_w*_z;
+        ret.cell(1, 1) = 1 - 2*_x*_x - 2*_z*_z;
+        ret.cell(1, 2) = 2*_y*_z - 2*_w*_x;
 
-        ret.cell(2, 0) = (2*(_x*_z))-(2*_w*_y);
-        ret.cell(2, 1) = (2*_y*_z)+(2*_w*_x);
-        ret.cell(2, 2) = 1-(2*(_x*_x))-(2*(_y*_y));
+        ret.cell(2, 0) = 2*_x*_z - 2*_w*_y;
+        ret.cell(2, 1) = 2*_y*_z + 2*_w*_x;
+        ret.cell(2, 2) = 1 - 2*_x*_x - 2*_y*_y;
         return ret;
     }
 
@@ -214,101 +195,69 @@ public:
         double sqy = _y*_y;
         double sqz = _z*_z;
 
-        ret.x() = atan2(2.0*(_x*_y+_z*_w),(sqx-sqy-sqz+sqw));
-        ret.y() = asin(-2.0*(_x*_z-_y*_w)/(sqx+sqy+sqz+sqw));
-        ret.z() = atan2(2.0*(_y*_z+_x*_w),(-sqx-sqy+sqz+sqw));
+        ret.x() = atan2(2.0*(_x*_y+_z*_w), (sqx-sqy-sqz+sqw));
+        ret.y() = asin(-2.0*(_x*_z-_y*_w) / (sqx+sqy+sqz+sqw));
+        ret.z() = atan2(2.0*(_y*_z+_x*_w), (-sqx-sqy+sqz+sqw));
 
         return ret;
     }
 
-    Vector<3> toAngularVelocity(float dt) const
+    Vector<3> toAngularVelocity(double dt) const
     {
         Vector<3> ret;
         Quaternion one(1.0, 0.0, 0.0, 0.0);
-        Quaternion delta = one - *this;
-        Quaternion r = (delta/dt);
+        Quaternion r = (one - *this) / dt;
         r = r * 2;
-        r = r * one;
+        //r = r * one.conjugate();
 
-        ret.x() = r.x();
-        ret.y() = r.y();
-        ret.z() = r.z();
-        return ret;
+        return Vector<3>(r.x(), r.y(), r.z());
     }
 
-    Vector<3> rotateVector(Vector<2> v) const
+    Vector<3> rotateVector(const Vector<2>& v) const
     {
-        Vector<3> ret(v.x(), v.y(), 0.0);
-        return rotateVector(ret);
+        return rotateVector(Vector<3>(v.x(), v.y()));
     }
 
-    Vector<3> rotateVector(Vector<3> v) const
+    Vector<3> rotateVector(const Vector<3>& v) const
     {
-        Vector<3> qv(this->x(), this->y(), this->z());
-        Vector<3> t;
-        t = qv.cross(v) * 2.0;
-        return v + (t * _w) + qv.cross(t);
+        Vector<3> qv(_x, _y, _z);
+        Vector<3> t = qv.cross(v) * 2.0;
+        return v + t*_w + qv.cross(t);
     }
 
-
-    Quaternion operator * (Quaternion q) const
+    Quaternion operator*(const Quaternion& q) const
     {
-        Quaternion ret;
-        ret._w = ((_w*q._w) - (_x*q._x) - (_y*q._y) - (_z*q._z));
-        ret._x = ((_w*q._x) + (_x*q._w) + (_y*q._z) - (_z*q._y));
-        ret._y = ((_w*q._y) - (_x*q._z) + (_y*q._w) + (_z*q._x));
-        ret._z = ((_w*q._z) + (_x*q._y) - (_y*q._x) + (_z*q._w));
-        return ret;
+        return Quaternion(
+            _w*q._w - _x*q._x - _y*q._y - _z*q._z,
+            _w*q._x + _x*q._w + _y*q._z - _z*q._y,
+            _w*q._y - _x*q._z + _y*q._w + _z*q._x,
+            _w*q._z + _x*q._y - _y*q._x + _z*q._w
+        );
     }
 
-    Quaternion operator + (Quaternion q) const
+    Quaternion operator+(const Quaternion& q) const
     {
-        Quaternion ret;
-        ret._w = _w + q._w;
-        ret._x = _x + q._x;
-        ret._y = _y + q._y;
-        ret._z = _z + q._z;
-        return ret;
+        return Quaternion(_w + q._w, _x + q._x, _y + q._y, _z + q._z);
     }
 
-    Quaternion operator - (Quaternion q) const
+    Quaternion operator-(const Quaternion& q) const
     {
-        Quaternion ret;
-        ret._w = _w - q._w;
-        ret._x = _x - q._x;
-        ret._y = _y - q._y;
-        ret._z = _z - q._z;
-        return ret;
+        return Quaternion(_w - q._w, _x - q._x, _y - q._y, _z - q._z);
     }
 
-    Quaternion operator / (float scalar) const
+    Quaternion operator/(double scalar) const
     {
-        Quaternion ret;
-        ret._w = this->_w/scalar;
-        ret._x = this->_x/scalar;
-        ret._y = this->_y/scalar;
-        ret._z = this->_z/scalar;
-        return ret;
+        return Quaternion(_w / scalar, _x / scalar, _y / scalar, _z / scalar);
     }
 
-    Quaternion operator * (float scalar) const
+    Quaternion operator*(double scalar) const
     {
-        Quaternion ret;
-        ret._w = this->_w*scalar;
-        ret._x = this->_x*scalar;
-        ret._y = this->_y*scalar;
-        ret._z = this->_z*scalar;
-        return ret;
+        return scaled(scalar);
     }
 
-    Quaternion scale(double scalar) const
+    Quaternion scaled(double scalar) const
     {
-        Quaternion ret;
-        ret._w = this->_w*scalar;
-        ret._x = this->_x*scalar;
-        ret._y = this->_y*scalar;
-        ret._z = this->_z*scalar;
-        return ret;
+        return Quaternion(_w * scalar, _x * scalar, _y * scalar, _z * scalar);
     }
 
 private:
