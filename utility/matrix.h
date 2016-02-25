@@ -143,7 +143,7 @@ public:
         return ret;
     }
 
-    Matrix<N-1> minor(int row, int col) const
+    Matrix<N-1> minorMatrix(int row, int col) const
     {
         int im, jm;
         Matrix<N-1> ret;
@@ -167,7 +167,7 @@ public:
         // specialization for N == 1 given below this class
         double det = 0.0, sign = 1.0;
         for (int i = 0; i < N; ++i, sign = -sign)
-            det += sign * cell(0, i) * minor(0, i).determinant();
+            det += sign * cell(0, i) * minorMatrix(0, i).determinant();
         return det;
     }
 
@@ -180,12 +180,20 @@ public:
         {
             for (int j = 0; j < N; j++)
             {
-                ret(i, j) = minor(j, i).determinant() / det;
+                ret(i, j) = minorMatrix(j, i).determinant() / det;
                 if ( (i+j)%2 == 1)
                     ret(i, j) = -ret(i, j);
             }
         }
         return ret;
+    }
+
+    double trace() const
+    {
+        double tr = 0.0;
+        for (int i = 0; i < N; ++i)
+            tr += cell(i, i);
+        return tr;
     }
 
 private:
