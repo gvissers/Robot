@@ -1,7 +1,7 @@
 BOARD_TAG     = uno
 MONITOR_PORT  = /dev/ttyACM0
 
-ARDUINO_LIBS  = EEPROM Wire
+ARDUINO_LIBS  = Adafruit_Sensor EEPROM Wire
 
 CXXFLAGS = -std=c++11
 

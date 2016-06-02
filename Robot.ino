@@ -5,7 +5,13 @@
 
 const bool debug = false;
 
-// Create the motor shield object with the default I2C address
+// Minimum distance from walls for full speed cruising
+const int min_cruise_dist = 100;
+// Minimum distance to wall, soft and hard limits
+const int min_dist_soft = 20;
+const int min_dist_hard = 15;
+
+// Create the motor shield object with the default I2C address 0x60
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Engine engine(&AFMS);
 
@@ -22,8 +28,6 @@ volatile bool update_music_now = false;
 enum DriveState
 {
     CRUISING,
-    SLOW_1,
-    SLOW_2,
     TURNING,
     HALT
 };
@@ -93,7 +97,8 @@ ISR(TIMER1_COMPA_vect)
         update_music_now = true;
     }
 
-    eyes.ultrasoundTick();
+//    eyes.ultrasoundTick();
+    eyes.infraredTick();
 }
 
 void setup()
@@ -101,14 +106,14 @@ void setup()
     if (debug)
         Serial.begin(9600);
 
-    pinMode(US_trigger_pin, OUTPUT);
-    pinMode(US_echo_pin, INPUT);
+//    pinMode(US_trigger_pin, OUTPUT);
+//    pinMode(US_echo_pin, INPUT);
     pinMode(piezo_pin, OUTPUT);
 
     setupTimer(timer1_us);
 
-    attachInterrupt(digitalPinToInterrupt(US_echo_pin),
-        []() { eyes.handleUltrasoundEcho(); }, CHANGE);
+//    attachInterrupt(digitalPinToInterrupt(US_echo_pin),
+//        []() { eyes.handleUltrasoundEcho(); }, CHANGE);
 
     AFMS.begin();  // create with the default frequency 1.6KHz
 
@@ -134,25 +139,26 @@ void loop()
         return;
 
     uint16_t dist = eyes.distance();
+    if (debug)
+    {
+        Serial.print("dist = ");
+        Serial.println(dist);
+    }
     sleep_until = now + 10;
-    if (dist > 100)
+    if (dist > min_cruise_dist)
     {
         if (speed < 255)
             engine.moveForward(++speed);
     }
-    else if (dist > 60)
+    else if (dist > min_dist_hard || (state == CRUISING && dist > min_dist_soft))
     {
-        if (speed < 127)
-            engine.moveForward(++speed);
-        else if (speed > 127)
-            engine.moveForward(--speed);
-    }
-    else if (dist > 20)
-    {
-        if (speed < 63)
-            engine.moveForward(++speed);
-        else if (speed > 63)
-            engine.moveForward(--speed);
+        uint8_t new_speed = 20 + (255 - 20) * (dist - min_dist_hard) / (min_cruise_dist - min_dist_hard);
+        if (new_speed != speed)
+        {
+            speed = new_speed;
+            engine.moveForward(speed);
+        }
+        state = CRUISING;
     }
     else
     {
@@ -161,8 +167,11 @@ void loop()
             speed = 0;
             engine.halt();
         }
-        engine.turnLeftForward(128, 255);
-        sleep_until = now + 640;
+        if (state != TURNING)
+        {
+            engine.turnLeftForward(128, 255);
+            state = TURNING;
+        }
     }
 
 //     if (debug)
