@@ -21,9 +21,6 @@
 #ifndef IMUMATH_QUATERNION_HPP
 #define IMUMATH_QUATERNION_HPP
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdint.h>
 #include <math.h>
 
 #include "matrix.h"

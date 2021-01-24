@@ -1,12 +1,13 @@
 #include "engine.h"
 #include "eyes.h"
+#include "positionsensor.h"
 #include "settings.h"
 #include "song.h"
 
-const bool debug = false;
+const bool debug = true;
 
 // Minimum distance from walls for full speed cruising
-const int min_cruise_dist = 100;
+const int min_cruise_dist = 80;
 // Minimum distance to wall, soft and hard limits
 const int min_dist_soft = 20;
 const int min_dist_hard = 15;
@@ -14,6 +15,9 @@ const int min_dist_hard = 15;
 // Create the motor shield object with the default I2C address 0x60
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Engine engine(&AFMS);
+
+// Create the position sensor object with the default I2C address 0x28
+PositionSensor pos_sensor;
 
 const char r2d2_desc[] PROGMEM = "AGECDBFcAGECDBFc";
 const char popcorn_desc[] PROGMEM = "aGaECEA,zaGaECEA,zabc'bc'ababgagafaz";
@@ -118,7 +122,7 @@ void setup()
     AFMS.begin();  // create with the default frequency 1.6KHz
 
     r2d2_song.start();
-    current_song = &r2d2_song;
+    //current_song = &r2d2_song;
 }
 
 void loop()
@@ -152,7 +156,8 @@ void loop()
     }
     else if (dist > min_dist_hard || (state == CRUISING && dist > min_dist_soft))
     {
-        uint8_t new_speed = 20 + (255 - 20) * (dist - min_dist_hard) / (min_cruise_dist - min_dist_hard);
+        uint8_t new_speed = 50 + (255 - 50) * (dist - min_dist_hard)
+                                    / (min_cruise_dist - min_dist_hard);
         if (new_speed != speed)
         {
             speed = new_speed;
@@ -169,7 +174,7 @@ void loop()
         }
         if (state != TURNING)
         {
-            engine.turnLeftForward(128, 255);
+            engine.turn(128, 255*eyes.turnDirection());
             state = TURNING;
         }
     }

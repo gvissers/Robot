@@ -44,32 +44,36 @@ public:
      * last change, which is then converted to a distance which is stored.
      */
     void handleUltrasoundEcho();
-	/**
-	 * Handle timer tick
-	 *
-	 * Handle a tick from the timer. This function is called from the timer
-	 * interrupt handler. It will do a distance measurement using an infrared
-	 * sensor, every \c US_trigger_ticks time it is called, and will cycle
-	 * through the different IR sensors.
-	 */
-	void infraredTick();
-	/**
-	 * Measure distance using IR
-	 *
-	 * Measure the current distance from infrared sensor \a which. This
-	 * function is called periodically with alternating values for \a which.
-	 * \param which The number of the IR sensor to measure
-	 */
-	void infraredMeasure(IRSensorNumber which);
+    /**
+     * Handle timer tick
+     *
+     * Handle a tick from the timer. This function is called from the timer
+     * interrupt handler. It will do a distance measurement using an infrared
+     * sensor, every \c US_trigger_ticks time it is called, and will cycle
+     * through the different IR sensors.
+     */
+    void infraredTick();
+    /**
+     * Measure distance using IR
+     *
+     * Measure the current distance from infrared sensor \a which. This
+     * function is called periodically with alternating values for \a which.
+     * \param which The number of the IR sensor to measure
+     */
+    void infraredMeasure(IRSensorNumber which);
 
     /// Return the value of the last successful measurement
-    volatile uint16_t distance() const
-	{
-		uint16_t dc = _IR_last_distance[0],
-			dl = _IR_last_distance[1],
-			dr = _IR_last_distance[2];
-		return min(dc, min(dl, dr));
-	}
+    uint16_t distance() const
+    {
+        uint16_t dc = _IR_last_distance[0],
+            dl = 14 * _IR_last_distance[1] / 10,
+            dr = 14 * _IR_last_distance[2] / 10;
+        return min(dc, min(dl, dr));
+    }
+    int turnDirection() const
+    {
+        return _IR_last_distance[1] < _IR_last_distance[2] ? 1 : -1;
+    }
 
 private:
     /// Current time tick. When it reaches zero, a new ultrasound pulse is sent
